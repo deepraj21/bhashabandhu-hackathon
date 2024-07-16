@@ -32,16 +32,36 @@ const App = () => {
     const [currentChat, setCurrentChat] = useState(null);
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
-    const [languages, setLanguages] = useState([]);
-    const [targetLanguage, setTargetLanguage] = useState('hi'); 
+    const [targetLanguage, setTargetLanguage] = useState('hi');
 
     useEffect(() => {
         fetchChats();
     }, []);
 
+    useEffect(() => {
+        const fetchCurrentChat = async (chat_id) => {
+            try {
+                const response = await axios.get(`https://server-fast-api.onrender.com/get_chat_history/${chat_id}`);
+                setCurrentChat(chat_id);
+                setMessages(response.data.messages);
+                localStorage.setItem('currentChat', chat_id);
+            } catch (error) {
+                console.error('Error fetching chat history:', error);
+                localStorage.removeItem('currentChat');
+                setCurrentChat(null);
+                setMessages([]);
+            }
+        };
+
+        const savedChatId = localStorage.getItem('currentChat');
+        if (savedChatId) {
+            fetchCurrentChat(savedChatId);
+        }
+    }, []);
+
     const fetchChats = async () => {
         try {
-            const response = await axios.get('http://localhost:8000/get_chats/');
+            const response = await axios.get('https://server-fast-api.onrender.com/get_chats/');
             setChats(response.data);
         } catch (error) {
             console.error('Error fetching chats:', error);
@@ -50,9 +70,10 @@ const App = () => {
 
     const fetchChatHistory = async (chat_id) => {
         try {
-            const response = await axios.get(`http://localhost:8000/get_chat_history/${chat_id}`);
+            const response = await axios.get(`https://server-fast-api.onrender.com/get_chat_history/${chat_id}`);
             setCurrentChat(chat_id);
             setMessages(response.data.messages);
+            localStorage.setItem('currentChat', chat_id); 
         } catch (error) {
             console.error('Error fetching chat history:', error);
         }
@@ -60,7 +81,7 @@ const App = () => {
 
     const startNewChat = async () => {
         try {
-            const response = await axios.post('http://localhost:8000/new_chat/');
+            const response = await axios.post('https://server-fast-api.onrender.com/new_chat/');
             fetchChats();
             fetchChatHistory(response.data.chat_id);
         } catch (error) {
@@ -70,8 +91,12 @@ const App = () => {
 
     const sendMessage = async () => {
         if (!newMessage.trim()) return;
+        if (typeof currentChat !== 'string' || !currentChat.trim()) {
+            console.error('Invalid chat_id:', currentChat);
+            return;
+        }
         try {
-            const response = await axios.post('http://localhost:8000/send_message/', {
+            const response = await axios.post('https://server-fast-api.onrender.com/send_message/', {
                 chat_id: currentChat,
                 user_message: newMessage
             });
@@ -79,13 +104,16 @@ const App = () => {
             setNewMessage('');
         } catch (error) {
             console.error('Error sending message:', error);
+            if (error.response) {
+                console.error('Error details:', error.response.data);
+            }
         }
     };
 
     const translateMessage = async (content) => {
         try {
-            const response = await axios.post('http://localhost:8000/scaler/translate', {
-                source_language: 'en', 
+            const response = await axios.post('https://server-fast-api.onrender.com/scaler/translate', {
+                source_language: 'en',
                 content: content,
                 target_language: targetLanguage
             });

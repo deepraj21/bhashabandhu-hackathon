@@ -109,6 +109,11 @@ If someone greets you with "hi", "hello", or any other greeting, or if they ask 
 """
 
 # Endpoints
+
+@app.post("/")
+async def new_chat():
+    return {"message": "Welcome to the LawLingo Chatbot API. Please use the /new_chat/ endpoint to start a new chat."}
+
 @app.post("/new_chat/")
 async def new_chat():
     chat_id = str(time.time())
