@@ -104,21 +104,22 @@ async def get_data(src, msg, target, srv_id):
 
 # Pre-prompt for legal context
 PRE_PROMPT = """
-You are an AI assistant specialized in law and legal rules, representing LawLingo. You know every legal thing to handle situations and can give easy explanations of hard legal jargons. You will only reply to legal-related questions such as legal advice, legal definitions, or legal procedures. If a question is not related to law and legal matters, you will respond with: "This question is not related to law and legal matters, so I can't answer it."
-If someone greets you with "hi", "hello", or any other greeting, or if they ask about you, respond with: "Hello! I am a chatbot from LawLingo, here to assist you with legal knowledge and solutions to your queries and problems. How can I help you today?"
+You are an AI assistant specialized in law and legal rules, representing Nyayved. You know every legal thing to handle situations and can give easy explanations of hard legal jargons. You will only reply to legal-related questions such as legal advice, legal definitions, or legal procedures. If a question is not related to law and legal matters, you will respond with: "This question is not related to law and legal matters, so I can't answer it."
+If someone greets you with "hi", "hello", or any other greeting, or if they ask about you, respond with: "Hello! I am a chatbot from Nyayved, here to assist you with legal knowledge and solutions to your queries and problems. How can I help you today?"
+If someone ask you to what this project about, respond with: "Nyayved is a chatbot that provides legal advice, legal definitions, and legal procedures. It is designed to assist you with legal knowledge and solutions to your queries and problems."
 """
 
 # Endpoints
 
-@app.post("/")
-async def new_chat():
-    return {"message": "Welcome to the LawLingo Chatbot API. Please use the /new_chat/ endpoint to start a new chat."}
+@app.get("/")
+async def welcome():
+    return {"message": "Welcome to the Nyayved Chatbot API. Please use the /new_chat/ endpoint to start a new chat."}
 
 @app.post("/new_chat/")
 async def new_chat():
     chat_id = str(time.time())
     chat_title = "New Chat"
-    past_chats[chat_id] = chat_title
+    past_chats[chat_id] = {"title": chat_title, "first_message_received": False}
     joblib.dump(past_chats, f'{DATA_DIR}/past_chats_list')
     return {"chat_id": chat_id, "chat_title": chat_title}
 
@@ -134,6 +135,12 @@ async def send_message(request: SendMessageRequest):
     
     # Add user message to chat history
     messages.append({"role": "user", "content": user_message})
+
+    # Update chat title if it's the first message
+    if not past_chats[chat_id]["first_message_received"]:
+        past_chats[chat_id]["title"] = user_message
+        past_chats[chat_id]["first_message_received"] = True
+        joblib.dump(past_chats, f'{DATA_DIR}/past_chats_list')
 
     # Initialize the generative model and chat
     model = genai.GenerativeModel('gemini-pro')
@@ -161,14 +168,15 @@ async def send_message(request: SendMessageRequest):
 
 @app.get("/get_chats/")
 async def get_chats():
-    return past_chats
+    # Return only the titles
+    return {chat_id: chat_data["title"] for chat_id, chat_data in past_chats.items()}
 
 @app.get("/get_chat_history/{chat_id}")
 async def get_chat_history(chat_id: str):
     if chat_id not in past_chats:
         raise HTTPException(status_code=404, detail="Chat not found")
     messages, _ = load_chat_history(chat_id)
-    return {"chat_title": past_chats[chat_id], "messages": messages}
+    return {"chat_title": past_chats[chat_id]["title"], "messages": messages}
 
 @app.post("/scaler/translate")
 async def translate_text(request: TranslationRequest):

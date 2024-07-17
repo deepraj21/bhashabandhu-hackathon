@@ -6,7 +6,7 @@ export default {
   server: {
     proxy: {
       '/api': {
-        target: 'https://server-fast-api.onrender.com/',
+        target: 'http://localhost:8000/',
         changeOrigin: true,
         // rewrite: (path) => path.replace(/^\/api/, '')
       }
