@@ -50,7 +50,7 @@ const App = () => {
 
     const fetchChats = async () => {
         try {
-            const response = await axios.get('http://localhost:8000/get_chats/');
+            const response = await axios.get('https://server-fast-api.onrender.com/get_chats/');
             const chatsData = response.data;
 
             // Transform the object into an array
@@ -70,7 +70,7 @@ const App = () => {
 
     const fetchCurrentChat = async (chat_id) => {
         try {
-            const response = await axios.get(`http://localhost:8000/get_chat_history/${chat_id}`);
+            const response = await axios.get(`https://server-fast-api.onrender.com/get_chat_history/${chat_id}`);
             setCurrentChat(chat_id);
             setMessages(response.data.messages);
             localStorage.setItem('currentChat', chat_id);
@@ -85,7 +85,7 @@ const App = () => {
 
     const checkAndStartNewChat = async () => {
         try {
-            const response = await axios.get('http://localhost:8000/get_chats/');
+            const response = await axios.get('https://server-fast-api.onrender.com/get_chats/');
             const chatsData = response.data;
 
             // Transform the object into an array
@@ -107,7 +107,7 @@ const App = () => {
 
     const fetchChatHistory = async (chat_id) => {
         try {
-            const response = await axios.get(`http://localhost:8000/get_chat_history/${chat_id}`);
+            const response = await axios.get(`https://server-fast-api.onrender.com/get_chat_history/${chat_id}`);
             setCurrentChat(chat_id);
             setMessages(response.data.messages);
             localStorage.setItem('currentChat', chat_id);
@@ -118,7 +118,7 @@ const App = () => {
 
     const startNewChat = async () => {
         try {
-            const response = await axios.post('http://localhost:8000/new_chat/');
+            const response = await axios.post('https://server-fast-api.onrender.com/new_chat/');
             fetchChats();
             fetchChatHistory(response.data.chat_id);
         } catch (error) {
@@ -132,7 +132,7 @@ const App = () => {
             await startNewChat();
         }
         try {
-            const response = await axios.post('http://localhost:8000/send_message/', {
+            const response = await axios.post('https://server-fast-api.onrender.com/send_message/', {
                 chat_id: currentChat,
                 user_message: newMessage
             });
@@ -148,7 +148,7 @@ const App = () => {
 
     const translateMessage = async (content) => {
         try {
-            const response = await axios.post('http://localhost:8000/scaler/translate', {
+            const response = await axios.post('https://server-fast-api.onrender.com/scaler/translate', {
                 source_language: 'en',
                 content: content,
                 target_language: targetLanguage
