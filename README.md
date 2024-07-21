@@ -13,7 +13,9 @@ https://www.bhashabandhu.com/
 
 By integrating these features, our solution aims to bridge the communication gap in the legal system, making justice more accessible and understandable to everyone, regardless of their educational or linguistic background. This approach ensures that legal information is both clear and legally accurate, facilitating better understanding and empowerment for individuals across diverse communities.
 
-Frontend Deployed at : https://nyayved.vercel.app
+`⚠️ NOTE: If trying to access the app kindly wait for 1-2 min because the server is deployed on render with free tier which makes it slow but you can always run the app locally, Installation commands Below:`
+
+Frontend Deployed at : https://nyayved.vercel.app 
 
 Backend Deployed at : https://server-fast-api.onrender.com
 
@@ -65,3 +67,6 @@ npm install
 npm run dev
 ```
 
+# Architecture Diagram
+
+<img src="./NyayVed_architecture.png">
